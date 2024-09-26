@@ -3,16 +3,252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scenario Quiz</title>
-    <link rel="stylesheet" href="style.css">
+    <title>User scammed</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #181818ff;
+        }
+        .container {
+            width: 360px;
+            height: 500px; /* Adjust the height as needed */
+            display: flex;
+            flex-direction: column;
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+        }
+        .header {
+            background-color: #eb2e63; /* Uplift Games color */
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .chat-window {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .message {
+            max-width: 80%;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 15px;
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+        }
+        .message.from-me {
+            background: #eb2e63; /* Uplift Games color */
+            color: white;
+            align-self: flex-end;
+            margin-left: auto; /* Align to right */
+        }
+        .message.from-other {
+            background: #e5e5ea;
+            color: #000;
+            align-self: flex-start;
+            margin-right: auto; /* Align to left */
+        }
+        .message.incorrect {
+            border: 2px solid #eb2e63; /* Uplift Games color */
+            box-shadow: 0 0 10px rgba(235, 46, 99, 0.5);
+        }
+        .message.correct {
+            border: 2px solid #28a745; /* Green color */
+            box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+        }
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            margin-top: 10px;
+        }
+        button {
+            padding: 10px;
+            border: none;
+            background-color: #eb2e63; /* Uplift Games color */
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #c81c54;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .additional-info {
+            font-size: 0.9em;
+            color: #555;
+        }
+    </style>
 </head>
 <body>
-    <div id="quiz-container">
-        <h1>Scenario Quiz</h1>
-        <div id="question"></div>
-        <div id="options"></div>
-        <button id="next-btn">Next</button>
+    <div class="container">
+        <div class="header">User Scammed Scenario</div>
+        <div class="chat-window" id="chatWindow"></div>
+        <div class="button-container" id="buttonContainer">
+            <!-- Buttons will be dynamically added here -->
+        </div>
     </div>
-    <script src="script.js"></script>
+    <script>
+        // Define conversation stages
+        const stages = [
+            {
+                prompt: 'A user creates a ticket exlaiming that they were scammed and want to get their lost items back',
+                responses: [
+                    { text: 'Ask for the username of the user who scammed them', correct: false, incorrectFeedback: 'Not quite! The first step when completing a ticket is to claim it to let the user who made the ticket know that it is being handled.', nextStage: 1 },
+                    { text: 'Claim the ticket', correct: true, feedback: 'Correct! The first step of handling any ticket is to claim it.', nextStage: 1 },
+                    { text: 'Escalate the ticket.', correct: false, incorrectFeedback: 'Escalations should only be made where necessary, which is not in this case', nextStage: 1 }
+                ]
+            },
+            {
+                prompt: 'You click the "claim" button within the ticket',
+                responses: [
+                    { text: 'Close the ticket.', correct: false, incorrectFeedback: 'You should not close a ticket unless you have a valid reason to do so.', nextStage: 2 },
+                    { text: 'Tell them that nothing can be done.', correct: false, incorrectFeedback: 'You should not tell them that nothing can be done. While they wont be able to get their pets back, they can still take action on the user who scammed them.', nextStage: 2 },
+                    { text: 'Ask for clarification on whether or not this happened in-game or in discord', correct: true, feedback: 'Correct! This will allow you to know if you need to moderate anyone in the server.', nextStage: 2 }
+                ]
+            },
+            {
+                prompt: '"Could you please clarify whether or not this started in discord, or if it was purely in-game? (In this scenario, the user replies: "It started in discord")',
+                responses: [
+                    { text: 'Ask the user for the Discord username/ID of the user who scammed them', correct: false, incorrectFeedback: 'It is best to ask for an uncropped screenshot, as this allows you to get evidence and the username of the user', nextStage: 3 },
+                    { text: 'Ask for an uncropped screenshot', correct: true, feedback: 'Correct, this screenshot will not only back up the users claims, but will also usually provide you with the discord username of the user who scammed them', nextStage: 3 },
+                    { text: 'Close the ticket', correct: false, incorrectFeedback: 'You should not close a ticket until you have helped/given the user the appropriate information.', nextStage: 4 }
+                ]
+            },
+            {
+                prompt: '"Could you please provide an uncropped screenshot of your conversation with the user in discord?" (The user sends a mobile screenshot of a user asking to trust trade in their DMs)',
+                responses: [
+                    { text: 'Moderate the user', correct: true, feedback: 'Correct! You should copy the scammers username and check their modlogs (?modlogs (userID) in #staff-commands). Then moderate them for illegal trading based on their number of offences: 1 - 3h mute, 2 - 24h mute, 3 - ban', nextStage: 4 },
+                    { text: 'Tell them nothing can be done', correct: false, incorrectFeedback: 'Incorrect, you can moderate the user, given the appropriate evidence!', nextStage: 5 },
+                    { text: 'Escalate the ticket to Helen', correct: false, incorrectFeedback: 'Only PC screenshots need to be escalated, screenshots from mobile are ok to do yourself (Though inspect the image carefully as to not falsely moderate a fake report).', nextStage: 5 }
+                ]
+            },
+            {
+                prompt: 'You can then let the user know that "All appropriate actions have been taken" (Do not mention how you moderated the user).',
+                responses: [
+                    { text: 'Close the ticket', correct: false, incorrectFeedback: 'Incorrect! Given they were allegedly scammed in-game, you should redirect them to Adopt Me Support or #adop-me-help to report the user. This can be done using the "/tag support - gen" command, or through a hand-written message.', nextStage: 5 },
+                    { text: 'Transfer the ticket to another moderator', correct: false, incorrectFeedback: 'This is a perfectly fine option! If you are feeling overwhelmed or are unsure what to do. You can ask for help or for someone else to take over your ticket in #ticket-discussion!', nextStage: 5 },
+                    { text: 'Redirect them to support', correct: true, feedback: 'Correct! Seeing as they were allegedly scammed in-game, they are able to report the user to Uplift staff!', nextStage: 6 }
+                ]
+            },
+            {
+                prompt: '"Keep in mind that cross-trading is not permitted, and doing so can result in being moderated within the discord, and in-game."',
+                responses: [
+                    { text: 'Close the ticket', correct: false, incorrectFeedback: 'Incorrect! There is crucial information that the user has to read in order to get all of the appropriate information they need, and closing the ticket may mean they do not read it.', nextStage: 7 },
+                    { text: 'Leave the ticket open', correct: false, incorrectFeedback: 'You should not leave a ticket open, as we dont want the queue to be filled up with completed tickets that simply havent been closed.', nextStage: 7 },
+                    { text: 'Request to close the ticket', correct: true, feedback: 'Correct, in this case, you should request to close the ticket (/closerequest delay: 6 Reason: closing message) as this will allow the user to close the ticket when they have read the information. This concludes this scenario, well done!!', nextStage: null }
+                ]
+            },
+            {
+                prompt: '"While we are able to take action within the discord, we are unable to assist with this in-game as we are only Discord volunteers; please head on over to https://www.playadopt.me/support, where the Support Team can help you. (You can use /tag support-gen)"',
+                responses: [
+                    { text: 'Explain to the user how cross-trading is not permitted (Verbal warning)', correct: true, feedback: 'Correct. If someone admits to illegal trading while reporting someone else, instead of moderating them through Dyno, we give them a verbal warning. This is to not deter people from creating reports if they know they might get banned.', nextStage: 5 },
+                    { text: 'Close the ticket', correct: false, incorrectFeedback: 'Do not close a ticket without a valid reason.', nextStage: null },
+                    { text: 'Moderate the user who made the ticket for cross trading', correct: false, incorrectFeedback: 'If someone admits to illegal trading while reporting someone else, a verbal warning is issued.', nextStage: null }
+                ]
+            }
+        ];
+
+        let currentStage = 0;
+        let previousMessageDivs = [];
+
+        function initChat() {
+            displayPrompt(stages[currentStage].prompt);
+        }
+
+        function displayPrompt(prompt) {
+            const chatWindow = document.getElementById('chatWindow');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message from-other';
+            messageDiv.innerText = prompt;
+            chatWindow.append(messageDiv);
+            chatWindow.scrollTop = chatWindow.scrollHeight; // Scroll to the bottom
+            previousMessageDivs.push(messageDiv);
+            
+            // Wait for the prompt to fade in before enabling buttons
+            setTimeout(() => {
+                createButtons(stages[currentStage].responses);
+            }, 500); // Delay to match the animation duration
+        }
+
+        function createButtons(responses) {
+            const buttonContainer = document.getElementById('buttonContainer');
+            buttonContainer.innerHTML = ''; // Clear existing buttons
+            responses.forEach(response => {
+                const button = document.createElement('button');
+                button.innerText = response.text;
+                button.onclick = () => handleResponse(response);
+                buttonContainer.append(button);
+            });
+        }
+
+        function handleResponse(response) {
+            const chatWindow = document.getElementById('chatWindow');
+            
+            // Display the user's response with a fade-in effect
+            const userResponseDiv = document.createElement('div');
+            userResponseDiv.className = 'message from-me';
+            userResponseDiv.innerText = response.text;
+            chatWindow.append(userResponseDiv);
+            chatWindow.scrollTop = chatWindow.scrollHeight; // Scroll to the bottom
+
+            // Remove previous incorrect messages
+            removeIncorrectMessages();
+
+            // Wait for a second before displaying the feedback
+            setTimeout(() => {
+                const feedbackDiv = document.createElement('div');
+                feedbackDiv.className = `message from-other ${response.correct ? 'correct' : 'incorrect'}`;
+                feedbackDiv.innerHTML = response.correct ? 
+                    response.feedback : 
+                    response.incorrectFeedback;
+                chatWindow.append(feedbackDiv);
+                chatWindow.scrollTop = chatWindow.scrollHeight; // Scroll to the bottom
+
+                // If the response is correct, proceed to the next stage
+                if (response.correct) {
+                    if (response.nextStage !== null) {
+                        currentStage = response.nextStage;
+                        setTimeout(() => {
+                            // Clear the previous responses and show new buttons after feedback
+                            removeIncorrectMessages();
+                            displayPrompt(stages[currentStage].prompt);
+                        }, 1000); // Delay to match feedback display
+                    } else {
+                        // End of conversation or no next stage
+                        document.getElementById('buttonContainer').innerHTML = '';
+                    }
+                }
+            }, 1000); // 1 second delay before showing the response
+        }
+
+        function removeIncorrectMessages() {
+            // Remove previous incorrect messages
+            previousMessageDivs.forEach(div => {
+                if (div.classList.contains('incorrect')) {
+                    div.remove();
+                }
+            });
+            // Clear the list of previous messages
+            previousMessageDivs = [];
+        }
+
+        // Initialize chat on page load
+        window.onload = initChat;
+    </script>
 </body>
 </html>
