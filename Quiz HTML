@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User scammed</title>
+    <title>I Can't get into Adopt Me!</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -25,7 +25,7 @@
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
         }
         .header {
-            background-color: #eb2e63; /* Uplift Games color */
+            background-color: #00a0df; /* Adopt Me color */
             color: white;
             padding: 10px;
             text-align: center;
@@ -48,7 +48,7 @@
             animation: fadeIn 0.5s forwards;
         }
         .message.from-me {
-            background: #eb2e63; /* Uplift Games color */
+            background: #00a0df; /* Adopt Me color */
             color: white;
             align-self: flex-end;
             margin-left: auto; /* Align to right */
@@ -60,11 +60,11 @@
             margin-right: auto; /* Align to left */
         }
         .message.incorrect {
-            border: 2px solid #eb2e63; /* Uplift Games color */
-            box-shadow: 0 0 10px rgba(235, 46, 99, 0.5);
+            border: 2px solid #ff0000; /* Red color */
+            box-shadow: 0 0 10px rgba(119, 0, 0, 0.5);
         }
         .message.correct {
-            border: 2px solid #28a745; /* Green color */
+            border: 2px solid #00831e; /* Green color */
             box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
         }
         .button-container {
@@ -75,7 +75,7 @@
         button {
             padding: 10px;
             border: none;
-            background-color: #eb2e63; /* Uplift Games color */
+            background-color: #00a0df; /* Adopt Me color */
             color: white;
             border-radius: 8px;
             cursor: pointer;
