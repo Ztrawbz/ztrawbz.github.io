@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User scammed</title>
+    <title>Daily Streak</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -25,7 +25,7 @@
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
         }
         .header {
-            background-color: #eb2e63; /* Uplift Games color */
+            background-color: #00a0df; /* Adopt Me color */
             color: white;
             padding: 10px;
             text-align: center;
@@ -48,7 +48,7 @@
             animation: fadeIn 0.5s forwards;
         }
         .message.from-me {
-            background: #eb2e63; /* Uplift Games color */
+            background: #00a0df; /* Adopt Me color */
             color: white;
             align-self: flex-end;
             margin-left: auto; /* Align to right */
@@ -75,14 +75,14 @@
         button {
             padding: 10px;
             border: none;
-            background-color: #eb2e63; /* Uplift Games color */
+            background-color: #00a0df; /* Adopt Me color */
             color: white;
             border-radius: 8px;
             cursor: pointer;
             margin: 5px;
         }
         button:hover {
-            background-color: #c81c54;
+            background-color: #00a0df;
         }
         @keyframes fadeIn {
             from { opacity: 0; }
@@ -96,7 +96,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">User Scammed Scenario</div>
+        <div class="header">Daily Streak</div>
         <div class="chat-window" id="chatWindow"></div>
         <div class="button-container" id="buttonContainer">
             <!-- Buttons will be dynamically added here -->
@@ -106,11 +106,11 @@
         // Define conversation stages
         const stages = [
             {
-                prompt: 'A user creates a ticket exlaiming that they were scammed and want to get their lost items back',
+                prompt: 'A user informs us that they lost their streak because Roblox banned them. How do you proceed?',
                 responses: [
-                    { text: 'Ask for the username of the user who scammed them', correct: false, incorrectFeedback: 'Not quite! The first step when completing a ticket is to claim it to let the user who made the ticket know that it is being handled.', nextStage: 1 },
-                    { text: 'Claim the ticket', correct: true, feedback: 'Correct! The first step of handling any ticket is to claim it.', nextStage: 1 },
-                    { text: 'Escalate the ticket.', correct: false, incorrectFeedback: 'Escalations should only be made where necessary, which is not in this case', nextStage: 1 }
+                    { text: 'Decline their ticket.', correct: false, incorrectFeedback: 'Not quite! We only decline if the Roblox ban was justified. We must find out if the ban was justified.', nextStage: 1 },
+                    { text: 'Request a screenshot of their ban reason.', correct: true, feedback: 'Correct! We can only act once we determine whether the Roblox ban was justified, which we do by assessing the ban reason.', nextStage: 1 },
+                    { text: 'Continue to restore their streak..', correct: false, incorrectFeedback: 'Not exactly! We will only continue to restore it if the Roblox ban is unjustified. We must find out if the ban was justified.', nextStage: 1 }
                 ]
             },
             {
