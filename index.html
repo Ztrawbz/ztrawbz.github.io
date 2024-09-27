@@ -110,55 +110,55 @@
                 responses: [
                     { text: 'Decline their ticket.', correct: false, incorrectFeedback: 'Not quite! We only decline if the Roblox ban was justified. We must find out if the ban was justified.', nextStage: 1 },
                     { text: 'Request a screenshot of their ban reason.', correct: true, feedback: 'Correct! We can only act once we determine whether the Roblox ban was justified, which we do by assessing the ban reason.', nextStage: 1 },
-                    { text: 'Continue to restore their streak..', correct: false, incorrectFeedback: 'Not exactly! We will only continue to restore it if the Roblox ban is unjustified. We must find out if the ban was justified.', nextStage: 1 }
+                    { text: 'Continue to restore their streak.', correct: false, incorrectFeedback: 'Not exactly! We will only continue to restore it if the Roblox ban is unjustified. We must find out if the ban was justified.', nextStage: 1 }
                 ]
             },
             {
-                prompt: 'You click the "claim" button within the ticket',
+                prompt: 'They provided a screenshot of their Roblox ban reason, which stated that they were banned for scamming by saying "Dont trust trade me."',
                 responses: [
-                    { text: 'Close the ticket.', correct: false, incorrectFeedback: 'You should not close a ticket unless you have a valid reason to do so.', nextStage: 2 },
-                    { text: 'Tell them that nothing can be done.', correct: false, incorrectFeedback: 'You should not tell them that nothing can be done. While they wont be able to get their pets back, they can still take action on the user who scammed them.', nextStage: 2 },
-                    { text: 'Ask for clarification on whether or not this happened in-game or in discord', correct: true, feedback: 'Correct! This will allow you to know if you need to moderate anyone in the server.', nextStage: 2 }
+                    { text: 'Ban is justified. Decline their ticket.', correct: false, incorrectFeedback: 'Incorrect. While the moderation was picked up for trust trading, this user was not attempting to trust trade. Therefore, the ban is not justified.', nextStage: 2 },
+                    { text: 'Ban is justified. Issue a temporary Adopt Me ban also for scamming.', correct: false, incorrectFeedback: 'Incorrect. While the moderation was picked up for trust trading, this user was not attempting to trust trade. Therefore, the ban is not justified. In addition, we would not moderate someone based solely on a Roblox ban; we would need our own evidence.', nextStage: 2 },
+                    { text: 'Ban is not justified. Continue to restore their streak.', correct: true, feedback: 'Correct. While the moderation was picked up for trust trading, this user was not attempting to trust trade, so the ban was unjustified, meaning they were not at fault for losing their streak. As such, we would continue to restore.', nextStage: 2 }
                 ]
             },
             {
-                prompt: '"Could you please clarify whether or not this started in discord, or if it was purely in-game? (In this scenario, the user replies: "It started in discord")',
+                prompt: 'The Roblox ban reason shows that they were banned for a month. This means they lost the streak over 7 days ago. Their current streak shows they logged in 5 days ago.  What should you do?',
                 responses: [
-                    { text: 'Ask the user for the Discord username/ID of the user who scammed them', correct: false, incorrectFeedback: 'It is best to ask for an uncropped screenshot, as this allows you to get evidence and the username of the user', nextStage: 3 },
-                    { text: 'Ask for an uncropped screenshot', correct: true, feedback: 'Correct, this screenshot will not only back up the users claims, but will also usually provide you with the discord username of the user who scammed them', nextStage: 3 },
-                    { text: 'Close the ticket', correct: false, incorrectFeedback: 'You should not close a ticket until you have helped/given the user the appropriate information.', nextStage: 4 }
+                    { text: 'Continue to restore their streak. It has only been 5 days since they first logged on. ', correct: true, feedback: 'Correct! Unless their current streak shows anything over 7 days, they are within the policy. The policy works from the moment they first log on and notice it has been lost, not from the day it was actually lost.', nextStage: 3 },
+                    { text: 'Decline their streak. This breaks the 7-day policy.', correct: false, incorrectFeedback: 'Not really! The policy works from the moment they first log on and notice it has been lost, not from the day it was actually lost. This user would have first logged on and noticed it was lost after the ban was up.', nextStage: 3 },
+                    { text: 'Ask another member of Support for advice.', correct: false, incorrectFeedback: 'Not exactly! While you can do this, there is a more cut-and-dry answer before you would need to enlist the help of another Support member. They lost their streak over 14 days ago, but it has not yet been 14 days since they first logged on and noticed the streak was lost, as per our policy.', nextStage: 3 }
                 ]
             },
             {
-                prompt: '"Could you please provide an uncropped screenshot of your conversation with the user in discord?" (The user sends a mobile screenshot of a user asking to trust trade in their DMs)',
+                prompt: 'Which CMDR command would we use to determine how long their streak is?',
                 responses: [
-                    { text: 'Moderate the user', correct: true, feedback: 'Correct! You should copy the scammers username and check their modlogs (?modlogs (userID) in #staff-commands). Then moderate them for illegal trading based on their number of offences: 1 - 3h mute, 2 - 24h mute, 3 - ban', nextStage: 4 },
-                    { text: 'Tell them nothing can be done', correct: false, incorrectFeedback: 'Incorrect, you can moderate the user, given the appropriate evidence!', nextStage: 5 },
-                    { text: 'Escalate the ticket to Helen', correct: false, incorrectFeedback: 'Only PC screenshots need to be escalated, screenshots from mobile are ok to do yourself (Though inspect the image carefully as to not falsely moderate a fake report).', nextStage: 5 }
+                    { text: 'viewsave', correct: false, incorrectFeedback: 'Almost! You would not use this command first, as another command can collect the longest streak and current streak immediately. You can use this command as a backup if necessary to find more information on the streak, such as the streak number before it reset.', nextStage: 4 },
+                    { text: 'setstreak', correct: false, incorrectFeedback: 'Not quite! This is not a spelling mistake. There are two commands called getstreak and setstreak. We would not use setstreak to gather information, as this command is used to restore the streak.', nextStage: 4 },
+                    { text: 'getstreak', correct: true, feedback: 'This is right! We use getstreak as it immediately provides us with two important pieces of information, their longest streak and their current streak.', nextStage: 4 }
                 ]
             },
             {
-                prompt: 'You can then let the user know that "All appropriate actions have been taken" (Do not mention how you moderated the user).',
+                prompt: 'You check their streak and find the information they gave you when answering the bot is incorrect. You realise that they are logged in to the wrong Roblox account, and they have not clarified why they are not logged into the main account. What happens now?',
                 responses: [
-                    { text: 'Close the ticket', correct: false, incorrectFeedback: 'Incorrect! Given they were allegedly scammed in-game, you should redirect them to Adopt Me Support or #adop-me-help to report the user. This can be done using the "/tag support - gen" command, or through a hand-written message.', nextStage: 5 },
-                    { text: 'Transfer the ticket to another moderator', correct: false, incorrectFeedback: 'This is a perfectly fine option! If you are feeling overwhelmed or are unsure what to do. You can ask for help or for someone else to take over your ticket in #ticket-discussion!', nextStage: 5 },
-                    { text: 'Redirect them to support', correct: true, feedback: 'Correct! Seeing as they were allegedly scammed in-game, they are able to report the user to Uplift staff!', nextStage: 6 }
+                    { text: 'Decline their ticket for not using their main account.', correct: true, feedback: 'Correct. The user has not disclosed why they are using a different account, such as being a parent or owner of an under 13 account and they are above 13. Therefore, we decline the ticket and explain that they must be logged into the correct account. ', nextStage: 5 },
+                    { text: 'Ask for the username of their main account and continue their ticket.', correct: false, incorrectFeedback: 'Incorrect. We cannot assist users unless they are logged in on the affected account or the account is marked as under 13, and they are a parent or above the age of 13. This person may not be who they say they are. We must not make any changes to an account unless we are assured about its ownership, which is done by them logging in. ', nextStage: 5 },
+                    { text: 'Restore the streak on this account instead.', correct: false, incorrectFeedback: 'Incorrect. We do not transfer anything, such as streaks, data, items, or passes, to a different account. They must be logged into the affected account, and we will only make changes to the affected account. ', nextStage: 5 }
                 ]
             },
             {
-                prompt: '"Keep in mind that cross-trading is not permitted, and doing so can result in being moderated within the discord, and in-game."',
+                prompt: 'They return to the correct account, and their ticket is assigned back to you. The streak the user lost was 28 days long. This is their first restore. Their current streak is 4 days long. What will you do?',
                 responses: [
-                    { text: 'Close the ticket', correct: false, incorrectFeedback: 'Incorrect! There is crucial information that the user has to read in order to get all of the appropriate information they need, and closing the ticket may mean they do not read it.', nextStage: 7 },
-                    { text: 'Leave the ticket open', correct: false, incorrectFeedback: 'You should not leave a ticket open, as we dont want the queue to be filled up with completed tickets that simply havent been closed.', nextStage: 7 },
-                    { text: 'Request to close the ticket', correct: true, feedback: 'Correct, in this case, you should request to close the ticket (/closerequest delay: 6 Reason: closing message) as this will allow the user to close the ticket when they have read the information. This concludes this scenario, well done!!', nextStage: null }
+                    { text: 'Restore their streak to 32 days.', correct: true, feedback: 'Correct. We would total up the streak lost as well as their current streak to ensure they do not lose out on the days they have logged in since.', nextStage: 6 },
+                    { text: 'Restore their streak to 28 days.', correct: false, incorrectFeedback: 'Incorrect. This would not be their streak to this day if they did not lose it. Out of fairness, we need to match as closely to what their streak should be today.', nextStage: 6 },
+                    { text: 'Decline their ticket as their streak was below 30 days.', correct: false, incorrectFeedback: 'Incorrect. This is their first restore so while our bots recommend that they do not use up their restore, we will still restore streaks under 30 days. Additional restores require streaks longer than 30 days.', nextStage: 6 }
                 ]
             },
             {
-                prompt: '"While we are able to take action within the discord, we are unable to assist with this in-game as we are only Discord volunteers; please head on over to https://www.playadopt.me/support, where the Support Team can help you. (You can use /tag support-gen)"',
+                prompt: 'Last question?',
                 responses: [
-                    { text: 'Explain to the user how cross-trading is not permitted (Verbal warning)', correct: true, feedback: 'Correct. If someone admits to illegal trading while reporting someone else, instead of moderating them through Dyno, we give them a verbal warning. This is to not deter people from creating reports if they know they might get banned.', nextStage: 5 },
-                    { text: 'Close the ticket', correct: false, incorrectFeedback: 'Do not close a ticket without a valid reason.', nextStage: null },
-                    { text: 'Moderate the user who made the ticket for cross trading', correct: false, incorrectFeedback: 'If someone admits to illegal trading while reporting someone else, a verbal warning is issued.', nextStage: null }
+                    { text: 'Correct Answer', correct: true, feedback: 'Correct! Great work, this is the end of the quiz!', nextStage: null },
+                    { text: 'Incorrect Answer', correct: false, incorrectFeedback: 'Incorrect! Try again.', nextStage: null },
+                    { text: 'Incorrect Answer', correct: false, incorrectFeedback: 'Incorrect! Try again.', nextStage: null }
                 ]
             }
         ];
