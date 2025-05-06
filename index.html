@@ -1,254 +1,1055 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Streak</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #181818ff;
-        }
-        .container {
-            width: 360px;
-            height: 500px; /* Adjust the height as needed */
-            display: flex;
-            flex-direction: column;
-            border-radius: 12px;
-            overflow: hidden;
-            background: white;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
-        }
-        .header {
-            background-color: #00a0df; /* Adopt Me color */
-            color: white;
-            padding: 10px;
-            text-align: center;
-            font-size: 16px;
-            font-weight: bold;
-        }
-        .chat-window {
-            flex: 1;
-            padding: 10px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
-        .message {
-            max-width: 80%;
-            margin: 5px 0;
-            padding: 10px;
-            border-radius: 15px;
-            opacity: 0;
-            animation: fadeIn 0.5s forwards;
-        }
-        .message.from-me {
-            background: #00a0df; /* Adopt Me color */
-            color: white;
-            align-self: flex-end;
-            margin-left: auto; /* Align to right */
-        }
-        .message.from-other {
-            background: #e5e5ea;
-            color: #000;
-            align-self: flex-start;
-            margin-right: auto; /* Align to left */
-        }
-        .message.incorrect {
-            border: 2px solid #eb2e63; /* Uplift Games color */
-            box-shadow: 0 0 10px rgba(235, 46, 99, 0.5);
-        }
-        .message.correct {
-            border: 2px solid #28a745; /* Green color */
-            box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
-        }
-        .button-container {
-            display: flex;
-            flex-direction: column;
-            margin-top: 10px;
-        }
-        button {
-            padding: 10px;
-            border: none;
-            background-color: #00a0df; /* Adopt Me color */
-            color: white;
-            border-radius: 8px;
-            cursor: pointer;
-            margin: 5px;
-        }
-        button:hover {
-            background-color: #00a0df;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        .additional-info {
-            font-size: 0.9em;
-            color: #555;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">Daily Streak</div>
-        <div class="chat-window" id="chatWindow"></div>
-        <div class="button-container" id="buttonContainer">
-            <!-- Buttons will be dynamically added here -->
-        </div>
-    </div>
-    <script>
-        // Define conversation stages
-        const stages = [
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Support Scenario Selector Chat</title>
+    <!-- Tailwind CSS for styling -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <!-- Babel for compiling JSX in the browser -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- React and ReactDOM from CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  </head>
+  <body class="bg-gray-100">
+    <div id="root"></div>
+    
+    <script type="text/babel">
+      const { useState, useEffect, useRef } = React;
+
+      // Define the scenarios array with three quizzes.
+      const scenarios = [
+        {
+          title: "Daily Streak Policy",
+          stages: [
             {
-                prompt: 'A user informs us that they lost their streak because Roblox banned them. How do you proceed?',
-                responses: [
-                    { text: 'Decline their ticket.', correct: false, incorrectFeedback: 'Not quite! We only decline if the Roblox ban was justified. We must find out if the ban was justified.', nextStage: 1 },
-                    { text: 'Request a screenshot of their ban reason.', correct: true, feedback: 'Correct! We can only act once we determine whether the Roblox ban was justified, which we do by assessing the ban reason.', nextStage: 1 },
-                    { text: 'Continue to restore their streak.', correct: false, incorrectFeedback: 'Not exactly! We will only continue to restore it if the Roblox ban is unjustified. We must find out if the ban was justified.', nextStage: 1 }
-                ]
+              prompt:
+                "A player contacts support saying they lost their streak. The player says they lost their streak due to being banned on Roblox. What’s your first step?",
+              responses: [
+                {
+                  text: "Restore the streak since the bot let it through.",
+                  correct: false,
+                  incorrectFeedback:
+                    "Even if it passed the bot, we still need to double-check. The bot is not perfect."
+                },
+                {
+                  text: "Decline the request immediately.",
+                  correct: false,
+                  incorrectFeedback:
+                    "Don't rush to deny it. First, review the ban reason to see if it's valid."
+                },
+                {
+                  text: "Ask for a screenshot of their Roblox ban reason.",
+                  correct: true,
+                  feedback:
+                    "That’s right. You need to confirm whether the ban was justified before taking action."
+                }
+              ]
             },
             {
-                prompt: 'They provided a screenshot of their Roblox ban reason, which stated that they were banned for scamming by saying "Dont trust trade me."',
-                responses: [
-                    { text: 'Ban is justified. Decline their ticket.', correct: false, incorrectFeedback: 'Incorrect. While the moderation was picked up for trust trading, this user was not attempting to trust trade. Therefore, the ban is not justified.', nextStage: 2 },
-                    { text: 'Ban is justified. Issue a temporary Adopt Me ban also for scamming.', correct: false, incorrectFeedback: 'Incorrect. While the moderation was picked up for trust trading, this user was not attempting to trust trade. Therefore, the ban is not justified. In addition, we would not moderate someone based solely on a Roblox ban; we would need our own evidence.', nextStage: 2 },
-                    { text: 'Ban is not justified. Continue to restore their streak.', correct: true, feedback: 'Correct. While the moderation was picked up for trust trading, this user was not attempting to trust trade, so the ban was unjustified, meaning they were not at fault for losing their streak. As such, we would continue to restore.', nextStage: 2 }
-                ]
+              prompt:
+                "The player shares a screenshot. The ban reason says: 'Saying Don’t trust trade me.' What should you do?",
+              responses: [
+                {
+                  text: "Consider the ban unjustified and continue the process.",
+                  correct: true,
+                  feedback:
+                    "Correct. This appears to be a misunderstanding — the player was likely warning others."
+                },
+                {
+                  text: "Decline the request.",
+                  correct: false,
+                  incorrectFeedback:
+                    "That would be unfair. The ban reason does not suggest harmful behaviour."
+                },
+                {
+                  text: "Escalate to a manager.",
+                  correct: false,
+                  incorrectFeedback:
+                    "You can handle this yourself. It falls within normal support policy."
+                }
+              ]
             },
             {
-                prompt: 'The Roblox ban reason shows that they were banned for a month. This means they lost the streak over 7 days ago. Their current streak shows they logged in 5 days ago.  What should you do?',
-                responses: [
-                    { text: 'Continue to restore their streak. It has only been 5 days since they first logged on. ', correct: true, feedback: 'Correct! Unless their current streak shows anything over 7 days, they are within the policy. The policy works from the moment they first log on and notice it has been lost, not from the day it was actually lost.', nextStage: 3 },
-                    { text: 'Decline their streak. This breaks the 7-day policy.', correct: false, incorrectFeedback: 'Not really! The policy works from the moment they first log on and notice it has been lost, not from the day it was actually lost. This user would have first logged on and noticed it was lost after the ban was up.', nextStage: 3 },
-                    { text: 'Ask another member of Support for advice.', correct: false, incorrectFeedback: 'Not exactly! While you can do this, there is a more cut-and-dry answer before you would need to enlist the help of another Support member. They lost their streak over 14 days ago, but it has not yet been 14 days since they first logged on and noticed the streak was lost, as per our policy.', nextStage: 3 }
-                ]
+              prompt:
+                "You run the getstreak command. The longest streak was 42 days, and the current streak is 6 days. What value do you restore?",
+              responses: [
+                {
+                  text: "42 days",
+                  correct: false,
+                  incorrectFeedback:
+                    "That would leave out the banked time the player has built back up."
+                },
+                {
+                  text: "48 days",
+                  correct: true,
+                  feedback:
+                    "Well done. You should restore the longest recorded streak plus the current banked days."
+                },
+                {
+                  text: "30 days",
+                  correct: false,
+                  incorrectFeedback:
+                    "We never reduce the streak to a lower value if the correct total is higher."
+                }
+              ]
             },
             {
-                prompt: 'Which CMDR command would we use to determine how long their streak is?',
-                responses: [
-                    { text: 'viewsave', correct: false, incorrectFeedback: 'Almost! You would not use this command first, as another command can collect the longest streak and current streak immediately. You can use this command as a backup if necessary to find more information on the streak, such as the streak number before it reset.', nextStage: 4 },
-                    { text: 'setstreak', correct: false, incorrectFeedback: 'Not quite! This is not a spelling mistake. There are two commands called getstreak and setstreak. We would not use setstreak to gather information, as this command is used to restore the streak.', nextStage: 4 },
-                    { text: 'getstreak', correct: true, feedback: 'This is right! We use getstreak as it immediately provides us with two important pieces of information, their longest streak and their current streak.', nextStage: 4 }
-                ]
+              prompt:
+                "The player had originally claimed their streak was 80 days. What should you do next?",
+              responses: [
+                {
+                  text: "Ask the player to explain the difference.",
+                  correct: false,
+                  incorrectFeedback:
+                    "That is not needed unless the data seems suspicious or conflicting."
+                },
+                {
+                  text: "Decline the request for submitting false information.",
+                  correct: false,
+                  incorrectFeedback:
+                    "This looks like a simple mistake, not an intentional attempt to mislead."
+                },
+                {
+                  text: "Proceed with the 48-day restore based on CMDR data.",
+                  correct: true,
+                  feedback:
+                    "Exactly. We go by verified data in CMDR, even if the player remembered it wrong."
+                }
+              ]
             },
             {
-                prompt: 'You check their streak and find the information they gave you when answering the bot is incorrect. You realise that they are logged in to the wrong Roblox account, and they have not clarified why they are not logged into the main account. What happens now?',
-                responses: [
-                    { text: 'Decline their ticket for not using their main account.', correct: true, feedback: 'Correct. The user has not disclosed why they are using a different account, such as being a parent or owner of an under 13 account and they are above 13. Therefore, we decline the ticket and explain that they must be logged into the correct account. ', nextStage: 5 },
-                    { text: 'Ask for the username of their main account and continue their ticket.', correct: false, incorrectFeedback: 'Incorrect. We cannot assist users unless they are logged in on the affected account or the account is marked as under 13, and they are a parent or above the age of 13. This person may not be who they say they are. We must not make any changes to an account unless we are assured about its ownership, which is done by them logging in. ', nextStage: 5 },
-                    { text: 'Restore the streak on this account instead.', correct: false, incorrectFeedback: 'Incorrect. We do not transfer anything, such as streaks, data, items, or passes, to a different account. They must be logged into the affected account, and we will only make changes to the affected account. ', nextStage: 5 }
-                ]
+              prompt:
+                "You confirm this was their second streak restoration. What does this mean for the future?",
+              responses: [
+                {
+                  text: "They are no longer eligible for future restorations.",
+                  correct: true,
+                  feedback:
+                    "Correct. After two restorations, the player has no further guaranteed streak restores."
+                },
+                {
+                  text: "You should mark the chat with #streakuncheckrequest.",
+                  correct: false,
+                  incorrectFeedback:
+                    "That tag is only used when denying a request, not approving it."
+                },
+                {
+                  text: "They can request one more streak restore.",
+                  correct: false,
+                  incorrectFeedback:
+                    "No, they have used both of their guaranteed opportunities."
+                }
+              ]
             },
             {
-                prompt: 'They return to the correct account, and their ticket is assigned back to you. The streak the user lost was 28 days long. This is their first restore. Their current streak is 4 days long. What will you do?',
-                responses: [
-                    { text: 'Restore their streak to 32 days.', correct: true, feedback: 'Correct. We would total up the streak lost as well as their current streak to ensure they do not lose out on the days they have logged in since.', nextStage: 6 },
-                    { text: 'Restore their streak to 28 days.', correct: false, incorrectFeedback: 'Incorrect. This would not be their streak to this day if they did not lose it. Out of fairness, we need to match as closely to what their streak should be today.', nextStage: 6 },
-                    { text: 'Decline their ticket as their streak was below 30 days.', correct: false, incorrectFeedback: 'Incorrect. This is their first restore so while our bots recommend that they do not use up their restore, we will still restore streaks under 30 days. Additional restores require streaks longer than 30 days.', nextStage: 6 }
-                ]
+              prompt:
+                "What command should you use to apply the updated streak to their account?",
+              responses: [
+                {
+                  text: "viewsave",
+                  correct: false,
+                  incorrectFeedback:
+                    "This is only used if you need extra context about their saves."
+                },
+                {
+                  text: "getstreak",
+                  correct: false,
+                  incorrectFeedback:
+                    "That’s for checking their streak, not updating it."
+                },
+                {
+                  text: "setstreak",
+                  correct: true,
+                  feedback:
+                    "Yes. This is the correct command to update the player’s streak in CMDR."
+                }
+              ]
             },
             {
-                prompt: 'You have restored their streak and now all you need to do is resolve the chat. Which canned response command would be the most relevant to send?',
-                responses: [
-                    { text: '/streakrestored', correct: true, feedback: 'Correct! This informs the user that their streak was restored, the number of days and when they should expect to see it. Though, please remember all canned responses are bases to be adapted upon and therefore, personalising them would be a nice touch. This is the end of the quiz, great job!', nextStage: null },
-                    { text: '/close', correct: false, incorrectFeedback: 'Incorrect! This informs the user that you are closing the ticket. While a closing message would come in handy here, and you should consider using it in addition, there is another response you should use first that gives them necessary information about the streak restoral.', nextStage: null },
-                    { text: '/bugfixed', correct: false, incorrectFeedback: 'Incorrect! This informs the user that their reported bug has been fixed by our engineering team. A streak loss, in most cases, is not a bug. Try a different canned response so that this user gets the information they need.', nextStage: null }
-                ]
+              prompt:
+                "After using the correct command and confirming the restore, what should you do next?",
+              responses: [
+                {
+                  text: "Let the player know how many days their streak was restored to and close the chat.",
+                  correct: true,
+                  feedback:
+                    "Perfect. Always confirm the result with the player and wrap up the chat clearly."
+                },
+                {
+                  text: "Add a private note with #streakuncheckrequest.",
+                  correct: false,
+                  incorrectFeedback:
+                    "That is only used when you deny a restoration, not when you approve it."
+                },
+                {
+                  text: "Leave the chat open so they can reply later.",
+                  correct: false,
+                  incorrectFeedback:
+                    "Chats should be closed properly once everything is resolved."
+                }
+              ]
             }
-        ];
-
-        let currentStage = 0;
-        let previousMessageDivs = [];
-
-        function initChat() {
-            displayPrompt(stages[currentStage].prompt);
-        }
-
-        function displayPrompt(prompt) {
-            const chatWindow = document.getElementById('chatWindow');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message from-other';
-            messageDiv.innerText = prompt;
-            chatWindow.append(messageDiv);
-            chatWindow.scrollTop = chatWindow.scrollHeight; // Scroll to the bottom
-            previousMessageDivs.push(messageDiv);
-            
-            // Wait for the prompt to fade in before enabling buttons
-            setTimeout(() => {
-                createButtons(stages[currentStage].responses);
-            }, 500); // Delay to match the animation duration
-        }
-
-        function createButtons(responses) {
-            const buttonContainer = document.getElementById('buttonContainer');
-            buttonContainer.innerHTML = ''; // Clear existing buttons
-            responses.forEach(response => {
-                const button = document.createElement('button');
-                button.innerText = response.text;
-                button.onclick = () => handleResponse(response);
-                buttonContainer.append(button);
-            });
-        }
-
-        function handleResponse(response) {
-            const chatWindow = document.getElementById('chatWindow');
-            
-            // Display the user's response with a fade-in effect
-            const userResponseDiv = document.createElement('div');
-            userResponseDiv.className = 'message from-me';
-            userResponseDiv.innerText = response.text;
-            chatWindow.append(userResponseDiv);
-            chatWindow.scrollTop = chatWindow.scrollHeight; // Scroll to the bottom
-
-            // Remove previous incorrect messages
-            removeIncorrectMessages();
-
-            // Wait for a second before displaying the feedback
-            setTimeout(() => {
-                const feedbackDiv = document.createElement('div');
-                feedbackDiv.className = `message from-other ${response.correct ? 'correct' : 'incorrect'}`;
-                feedbackDiv.innerHTML = response.correct ? 
-                    response.feedback : 
-                    response.incorrectFeedback;
-                chatWindow.append(feedbackDiv);
-                chatWindow.scrollTop = chatWindow.scrollHeight; // Scroll to the bottom
-
-                // If the response is correct, proceed to the next stage
-                if (response.correct) {
-                    if (response.nextStage !== null) {
-                        currentStage = response.nextStage;
-                        setTimeout(() => {
-                            // Clear the previous responses and show new buttons after feedback
-                            removeIncorrectMessages();
-                            displayPrompt(stages[currentStage].prompt);
-                        }, 1000); // Delay to match feedback display
-                    } else {
-                        // End of conversation or no next stage
-                        document.getElementById('buttonContainer').innerHTML = '';
-                    }
+          ]
+        },
+        {
+          title: "Can't Get Into Adopt Me Policy",
+          stages: [
+            {
+              prompt:
+                "A player says they can't log into Adopt Me on their iPad. What is your first step in helping them?",
+              responses: [
+                {
+                  text: "Use the iPhone or iPad canned response.",
+                  correct: true,
+                  feedback:
+                    "Great. You should always start by sending the relevant device-specific canned response."
+                },
+                {
+                  text: "Ask them to reinstall Roblox.",
+                  correct: false,
+                  incorrectFeedback:
+                    "That might help, but it is already included in the canned response. Start by sending that first."
+                },
+                {
+                  text: "Tell them to contact Roblox support.",
+                  correct: false,
+                  incorrectFeedback:
+                    "Not yet. We should try troubleshooting first using the tools we have."
                 }
-            }, 1000); // 1 second delay before showing the response
-        }
-
-        function removeIncorrectMessages() {
-            // Remove previous incorrect messages
-            previousMessageDivs.forEach(div => {
-                if (div.classList.contains('incorrect')) {
-                    div.remove();
+              ]
+            },
+            {
+              prompt:
+                "They say the app keeps kicking them out with error code 268. What do you do?",
+              responses: [
+                {
+                  text: "Let them know this is a Roblox error and share the device-specific steps.",
+                  correct: true,
+                  feedback:
+                    "Correct. Error 268 is a Roblox-side issue, but you can still offer helpful advice based on their device."
+                },
+                {
+                  text: "Ask them to change their Adopt Me settings.",
+                  correct: false,
+                  incorrectFeedback:
+                    "This issue happens before Adopt Me fully loads. Settings won’t help here."
+                },
+                {
+                  text: "Report it as an Adopt Me bug.",
+                  correct: false,
+                  incorrectFeedback:
+                    "Error 268 is not caused by Adopt Me, so there is no need to report it to our devs."
                 }
-            });
-            // Clear the list of previous messages
-            previousMessageDivs = [];
+              ]
+            },
+            {
+              prompt:
+                "The player tries your advice but now says they’re stuck on “Loading Save.” What’s next?",
+              responses: [
+                {
+                  text: "Follow the internal Notion guide and send them the steps from it.",
+                  correct: true,
+                  feedback:
+                    "Yes. Check the internal guide and walk them through the steps. Do not send the link."
+                },
+                {
+                  text: "Share the Notion guide directly with the player.",
+                  correct: false,
+                  incorrectFeedback:
+                    "That document is for internal use only. Just send them the relevant steps."
+                },
+                {
+                  text: "Skip to restoring their save in CMDR.",
+                  correct: false,
+                  incorrectFeedback:
+                    "That is a last resort. Try all troubleshooting steps first."
+                }
+              ]
+            },
+            {
+              prompt:
+                "You’ve followed every step but nothing has helped. What should you do next?",
+              responses: [
+                {
+                  text: "Ask Steven or Codie for support.",
+                  correct: true,
+                  feedback:
+                    "Exactly. Once you have tried all troubleshooting steps, they can offer guidance."
+                },
+                {
+                  text: "Escalate to Roblox.",
+                  correct: false,
+                  incorrectFeedback:
+                    "Roblox does not assist with Adopt Me-specific login problems."
+                },
+                {
+                  text: "Suggest waiting a few more days.",
+                  correct: false,
+                  incorrectFeedback:
+                    "There is no need to delay. Ask for help once you have followed all steps."
+                }
+              ]
+            },
+            {
+              prompt:
+                "The player mentions they believe they were banned from Adopt Me. What should you do?",
+              responses: [
+                {
+                  text: "Check the ban code in the Adopt Me Support spreadsheet.",
+                  correct: true,
+                  feedback:
+                    "Correct. Always look up the ban code to confirm what it means before continuing."
+                },
+                {
+                  text: "Tell them they need to create a new Roblox account.",
+                  correct: false,
+                  incorrectFeedback:
+                    "That is not appropriate unless they are permanently banned and told to do so by us."
+                },
+                {
+                  text: "Assume it is a Roblox issue and ignore it.",
+                  correct: false,
+                  incorrectFeedback:
+                    "Adopt Me bans are handled by us, so we should always check the code."
+                }
+              ]
+            },
+            {
+              prompt:
+                "You’ve confirmed the player is not banned and their save is working again, and you reassure them as such. They now ask why they lost their daily streak after 72 hours of login issues. What do you do?",
+              responses: [
+                {
+                  text: "Let them know they can request a streak restoration if eligible.",
+                  correct: true,
+                  feedback:
+                    "Good job. If they meet the criteria, they can request a streak restoration through our system."
+                },
+                {
+                  text: "Offer to restore it manually without checking anything.",
+                  correct: false,
+                  incorrectFeedback:
+                    "All restores must follow our official policy. Do not do it manually unless approved."
+                },
+                {
+                  text: "Explain that we don’t restore streaks at all.",
+                  correct: false,
+                  incorrectFeedback:
+                    "Actually, we do restore streaks in certain situations. Always check the policy."
+                }
+              ]
+            },
+            {
+              prompt:
+                "You’ve helped the player resolve their login issue. What should you do before closing the chat?",
+              responses: [
+                {
+                  text: "Confirm everything is working and ask if they need help with anything else.",
+                  correct: true,
+                  feedback:
+                    "Correct. Always check that the issue is resolved and offer further help before closing."
+                },
+                {
+                  text: "Immediately close the chat once the issue is fixed.",
+                  correct: false,
+                  incorrectFeedback:
+                    "Not just yet. Check in with the player first to make sure they are happy."
+                },
+                {
+                  text: "Leave the chat open in case they message back.",
+                  correct: false,
+                  incorrectFeedback:
+                    "Close it properly once you confirm they are all set."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          title: "Hacked Scenario",
+          stages: [
+            {
+              prompt:
+                "A player has come to us reporting that they were hacked 12 days ago. Based on this information, how do you proceed with the report?",
+              responses: [
+                {
+                  text: "Proceed with reviewing the chat with the result of a hacked item return.",
+                  correct: true,
+                  feedback:
+                    "Correct. This player is eligible for a hacked return because they are within the 14-day time limit."
+                },
+                {
+                  text: "Proceed with reviewing the chat with the result of a hacked item compensation.",
+                  correct: false,
+                  incorrectFeedback:
+                    "Not quite! We only offer compensation if they’re within 365 days but outside the 14-day time limit. Try again."
+                },
+                {
+                  text: "Deny the request as we do not return items.",
+                  correct: false,
+                  incorrectFeedback:
+                    "That is incorrect because we do offer hacked returns within the eligible time frame."
+                }
+              ]
+            },
+            {
+              prompt:
+                "The player has submitted all screenshots. Before proceeding, what should you check in the Roblox Support email?",
+              responses: [
+                {
+                  text: "That it shows a human agent’s name, the restored account name, the date, and the player’s username.",
+                  correct: true,
+                  feedback:
+                    "Correct. These are the required details to prove a legitimate restoration."
+                },
+                {
+                  text: "That the player confirmed they contacted Roblox Support themselves.",
+                  correct: false,
+                  incorrectFeedback:
+                    "We only verify the email content, not who reached out."
+                },
+                {
+                  text: "That the email mentions Adopt Me or the specific items lost.",
+                  correct: false,
+                  incorrectFeedback:
+                    "That’s not necessary. The email only needs to confirm account restoration with the required details."
+                }
+              ]
+            },
+            {
+              prompt:
+                "The “New Device Log-In Detected” email does not include the player’s username. What should you do?",
+              responses: [
+                {
+                  text: "Let the player know the screenshot is missing information and ask them to resend one with their username visible.",
+                  correct: true,
+                  feedback:
+                    "Correct. The email must show their username clearly to prove the account was theirs."
+                },
+                {
+                  text: "Deny the request immediately.",
+                  correct: false,
+                  incorrectFeedback:
+                    "Give the player a chance to submit a correct screenshot before denying."
+                },
+                {
+                  text: "Continue as normal if everything else looks okay.",
+                  correct: false,
+                  incorrectFeedback:
+                    "We can’t move forward without this verification. It's a required part of the process."
+                }
+              ]
+            },
+            {
+              prompt:
+                "While reviewing the screenshots, you notice the Roblox Support email was sent by “noreply@roblox.com” and doesn’t include an agent name. What should you do?",
+              responses: [
+                {
+                  text: "Let the player know this is an automated email and ask for a screenshot of a message from a human agent.",
+                  correct: true,
+                  feedback:
+                    "Correct. Only responses from a human Roblox Support agent are accepted. Automated emails aren’t valid proof."
+                },
+                {
+                  text: "Continue processing the reversal if everything else looks good.",
+                  correct: false,
+                  incorrectFeedback:
+                    "We can't move forward without a valid human restoration email. It’s a key requirement."
+                },
+                {
+                  text: "Accept it this time but leave a note on the chat.",
+                  correct: false,
+                  incorrectFeedback:
+                    "The rules apply to all requests. Accepting invalid proof sets the wrong precedent."
+                }
+              ]
+            },
+            {
+              prompt:
+                "They reply with the correct screenshot and so you continue. While reviewing the chat, you realize this player already received a hacked compensation from Adopt Me Support last year. What should you do?",
+              responses: [
+                {
+                  text: "Proceed with reviewing the chat and process the hacked item return.",
+                  correct: true,
+                  feedback:
+                    "Correct. Since compensation and item returns are treated separately, they are still eligible for a return."
+                },
+                {
+                  text: "Deny the request. Players can only receive one form of support.",
+                  correct: false,
+                  incorrectFeedback:
+                    "Not correct. Compensation and item returns are treated as separate forms of support, so the player is eligible for a return."
+                },
+                {
+                  text: "Escalate to a manager to see if an exception can be made.",
+                  correct: false,
+                  incorrectFeedback:
+                    "There are no exceptions needed — the player is still eligible for a return."
+                }
+              ]
+            },
+            {
+              prompt:
+                "You’ve confirmed the player meets all criteria, and now you can start the return process. What command should you use to reverse the trades?",
+              responses: [
+                {
+                  text: "reverttrades player_id I didn’t make this trade date_of_hack date_of_chat 30",
+                  correct: true,
+                  feedback:
+                    "Correct. This is the full correct syntax for reversing all trades in one go, with a 30-day untradeable period."
+                },
+                {
+                  text: "reverttrade player_id",
+                  correct: false,
+                  incorrectFeedback:
+                    "This only brings up the trade history for you to revert items manually, without the 30-day untradeable period which is non-negotiable. Have another go."
+                },
+                {
+                  text: "reverttrades player_id 30 date_of_chat I didn’t make this trade",
+                  correct: false,
+                  incorrectFeedback:
+                    "This has the correct elements but in the wrong order. The syntax must be followed exactly."
+                }
+              ]
+            },
+            {
+              prompt:
+                "After using the command, what should you do next?",
+              responses: [
+                {
+                  text: "Let the player know the reversal is complete and remind them the items will be untradeable for 30 days, and close the chat.",
+                  correct: true,
+                  feedback:
+                    "Correct. Always confirm the result and set expectations before closing the chat."
+                },
+                {
+                  text: "Wait for the player to confirm the items are in their inventory.",
+                  correct: false,
+                  incorrectFeedback:
+                    "You don’t need to wait. Once the command is confirmed, the process is complete."
+                },
+                {
+                  text: "Ask the player if they want to receive compensation instead.",
+                  correct: false,
+                  incorrectFeedback:
+                    "They’re not eligible for both, and the reversal has already been completed."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          title: "Purchase Issue Scenario",
+          stages: [
+            {
+              prompt:
+                "A player contacts us about not receiving a purchased item and provides a bank statement showing a Robux purchase. What should you do?",
+              responses: [
+                {
+                  text: "Let the player know we cannot accept bank statements and ask for a full-screen screenshot of their Roblox Purchase History.",
+                  correct: true,
+                  feedback:
+                    "Correct. We can only accept screenshots of the Roblox Purchase History, not bank statements."
+                },
+                {
+                  text: "Proceed with the investigation using the bank statement.",
+                  correct: false,
+                  incorrectFeedback:
+                    "We can't investigate or grant purchases based on bank statements alone."
+                },
+                {
+                  text: "Tell them to contact Roblox and resolve the chat.",
+                  correct: false,
+                  incorrectFeedback:
+                    "We should give them a chance to provide the correct proof before closing the chat."
+                }
+              ]
+            },
+            {
+              prompt:
+                "The player sends the correct Roblox Purchase History screenshot. It shows a purchase made 20 days ago. What should you do?",
+              responses: [
+                {
+                  text: "Proceed with investigating the issue.",
+                  correct: true,
+                  feedback:
+                    "Correct. The purchase is within the 30-day window, so you're clear to begin the investigation."
+                },
+                {
+                  text: "Deny the request, as 20 days is too long.",
+                  correct: false,
+                  incorrectFeedback:
+                    "Nope! We allow purchase investigations for up to 30 days after the purchase date."
+                },
+                {
+                  text: "Ask the player to re-purchase the item.",
+                  correct: false,
+                  incorrectFeedback:
+                    "We aim to resolve issues, not suggest they rebuy the item."
+                }
+              ]
+            },
+            {
+              prompt:
+                "The purchase meets all requirements and you're ready to investigate. What system tools should you use to check whether the item was granted?",
+              responses: [
+                {
+                  text: "Use our player data store system.",
+                  correct: true,
+                  feedback:
+                    "Correct. These internal tools allow you to verify whether the item was successfully granted to the player."
+                },
+                {
+                  text: "Use the player’s journal.",
+                  correct: false,
+                  incorrectFeedback:
+                    "This won’t reliably show whether a purchase was delivered."
+                },
+                {
+                  text: "Use a visual inspection of the player’s profile.",
+                  correct: false,
+                  incorrectFeedback:
+                    "This won’t reliably show whether a purchase was delivered."
+                }
+              ]
+            },
+            {
+              prompt:
+                "You’ve confirmed the item was granted successfully, but the player says it’s not in their inventory. What should you check next?",
+              responses: [
+                {
+                  text: "Check the player’s trade history to confirm the item hasn’t been traded away.",
+                  correct: true,
+                  feedback:
+                    "Correct. Confirming whether it was traded is important if the item was granted but isn’t in their inventory."
+                },
+                {
+                  text: "Grant the item immediately without checking.",
+                  correct: false,
+                  incorrectFeedback:
+                    "Hold on! Always investigate first because granting too soon can lead to duplicates or abuse."
+                },
+                {
+                  text: "Ask the player to repurchase the item and close the chat.",
+                  correct: false,
+                  incorrectFeedback:
+                    "Never ask the player to repurchase something they already paid for; it’s our responsibility to resolve it."
+                }
+              ]
+            },
+            {
+              prompt:
+                "The player has not traded this item away. What should you do next?",
+              responses: [
+                {
+                  text: "Check if the item is in the correct location in their viewsave.",
+                  correct: true,
+                  feedback:
+                    "Correct. It may have been granted correctly but saved in an unexpected place (e.g. gift section, toy section etc.) and the player has not realised."
+                },
+                {
+                  text: "Run the item grant command without verifying further.",
+                  correct: false,
+                  incorrectFeedback:
+                    "Not yet! Make sure it’s truly missing before granting again, as duplicate grants can create issues."
+                },
+                {
+                  text: "Tell the player to contact Roblox Support instead.",
+                  correct: false,
+                  incorrectFeedback:
+                    "This is an Adopt Me issue; if the item grant was successful on our side, we’re responsible for resolving it."
+                }
+              ]
+            },
+            {
+                prompt:
+                "You realise that you cannot find the item because the account they’re contacting us from doesn’t match the account that made the purchase. What should you do?",
+              responses: [
+                {
+                  text: "Let the player know the account that made the purchase must be the one receiving the item.",
+                  correct: true,
+                  feedback:
+                    "Correct. We can only grant the item to the account that made the purchase."
+                },
+                {
+                  text: "Grant the item to the username they provided anyway.",
+                  correct: false,
+                  incorrectFeedback:
+                    "For security reasons, the request must come from the purchasing account."
+                },
+                {
+                  text: "Deny the request immediately and close the chat.",
+                  correct: false,
+                  incorrectFeedback:
+                    "Be sure to explain the issue and offer a path forward before closing."
+                }
+              ]
+            },
+            {
+                prompt:
+                "They’ve recontacted us on the other account. You’ve verified that the correct account submitted the request, the proof is valid, and the item wasn’t delivered. What should you do now?",
+              responses: [
+                {
+                  text: "Grant the missing item and close the chat.",
+                  correct: true,
+                  feedback:
+                    "That's correct. All steps are complete. It's time to deliver the item, inform the player, and end the chat."
+                },
+                {
+                  text: "Ask the player to try purchasing it again.",
+                  correct: false,
+                  incorrectFeedback:
+                    "Not necessary as they've already made a valid purchase."
+                },
+                {
+                  text: "Wait for them to confirm again that the item is still missing.",
+                  correct: false,
+                  incorrectFeedback:
+                    "Once you’ve completed your checks, there’s no need to delay resolution."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          title: "Ban Appeal Scenario",
+          stages: [
+            {
+              prompt:
+                "A player was banned from Adopt Me, and they have come to us to appeal their ban. The player was banned 160 days ago. What should you do?",
+              responses: [
+                {
+                  text: "Proceed with the appeal.",
+                  correct: true,
+                  feedback:
+                    "Correct. Since the ban was within the last 180 days, the appeal can be processed."
+                },
+                {
+                  text: "Deny the appeal.",
+                  correct: false,
+                  incorrectFeedback:
+                    "The ban is within the time window for appeals, so this is incorrect."
+                },
+                {
+                  text: "Ask the player to wait another day.",
+                  correct: false,
+                  incorrectFeedback:
+                    "There's no need to ask them to wait. The appeal is eligible for processing."
+                }
+              ]
+            },
+            {
+              prompt:
+                "The player was banned under Code 810 (inappropriate chat behavior). The player has already waited 2 days. What do you do next?",
+              responses: [
+                {
+                  text: "Let them know they can appeal after 30 days.",
+                  correct: true,
+                  feedback:
+                    "Correct. Code 810 bans require a 30-day wait before an appeal is eligible. Let them know they’ll need to wait longer and close the chat. While this is classed as a denial, it does not count as a strike."
+                },
+                {
+                  text: "Deny the appeal immediately based on the reason for the ban.",
+                  correct: false,
+                  incorrectFeedback:
+                    "The player can still appeal once the full 30 days are up, so denying now and using a strike is not correct."
+                },
+                {
+                  text: "Accept the appeal and proceed with reviewing evidence.",
+                  correct: false,
+                  incorrectFeedback:
+                    "They must wait for the full 30 days, so we can't proceed yet."
+                }
+              ]
+            },
+            {
+              prompt:
+                "The player returns after the 30-day time limit. You’re reviewing the player’s ban for Code 810. The appeal includes no ban code or screenshots, but the bot has already verified this. What should you do?",
+              responses: [
+                {
+                  text: "Proceed with reviewing the appeal.",
+                  correct: true,
+                  feedback:
+                    "Correct. The bot has already verified the information, so you can move forward with reviewing the appeal."
+                },
+                {
+                  text: "Deny the appeal due to missing information.",
+                  correct: false,
+                  incorrectFeedback:
+                    "The bot verified the ban information, so missing a ban code or screenshot is not an issue."
+                },
+                {
+                  text: "Ask the player to submit their ban code and screenshot.",
+                  correct: false,
+                  incorrectFeedback:
+                    "Since the bot has already checked this, there’s no need to ask the player for more."
+                }
+              ]
+            },
+            {
+              prompt:
+                "The player apologizes and seems remorseful. What do you do?",
+              responses: [
+                {
+                  text: "Continue the review process and evaluate the evidence.",
+                  correct: true,
+                  feedback:
+                    "Correct. While remorse can be considered, the focus is on the evidence of the player’s behavior."
+                },
+                {
+                  text: "Immediately unban the player.",
+                  correct: false,
+                  incorrectFeedback:
+                    "Remorse alone doesn’t justify unbanning. The evidence needs to be reviewed first."
+                },
+                {
+                  text: "Deny the appeal, but thank them for their apology.",
+                  correct: false,
+                  incorrectFeedback:
+                    "This isn't a sufficient reason to deny the appeal. The evidence must be the deciding factor."
+                }
+              ]
+            },
+            {
+              prompt:
+                "The agent checks the ban sheet and can’t find the player’s ban listed. What should they do?",
+              responses: [
+                {
+                  text: "Unban the player if the ban wasn’t logged by Steven or Codie.",
+                  correct: true,
+                  feedback:
+                    "Correct. If the ban isn’t listed and it’s not from Steven or Codie, the player can be unbanned."
+                },
+                {
+                  text: "Deny the appeal and close the chat.",
+                  correct: false,
+                  incorrectFeedback:
+                    "This is incorrect. If the ban isn’t logged and wasn’t issued by Steven or Codie, you should proceed with unbanning."
+                },
+                {
+                  text: "Escalate the issue to Steven or Codie.",
+                  correct: false,
+                  incorrectFeedback:
+                    "Escalation isn't necessary unless it’s a serious or unmarked ban made by them."
+                }
+              ]
+            },
+            {
+              prompt:
+                "You check the ban history and find that the player was banned by Steven. What should you do next?",
+              responses: [
+                {
+                  text: "Reach out to Steven for further guidance.",
+                  correct: true,
+                  feedback:
+                    "Correct. If Steven issued the ban, you need to check with them before proceeding."
+                },
+                {
+                  text: "Proceed with the appeal and unban the player.",
+                  correct: false,
+                  incorrectFeedback:
+                    "This is incorrect. Since Steven issued the ban, you need to check with them first."
+                },
+                {
+                  text: "Deny the appeal immediately.",
+                  correct: false,
+                  incorrectFeedback:
+                    "Not necessary. You must first confirm with Steven before deciding."
+                }
+              ]
+            },
+            {
+              prompt:
+                "After reviewing all the information, and checking with Steven, you’ve both decided to unban the player. What should you do next?",
+              responses: [
+                {
+                  text: "Use the unban command and log the unban in the Ban Sheet.",
+                  correct: true,
+                  feedback:
+                    "Correct. You need to officially unban the player and record it in the Ban Sheet. Once you’ve done that, confirm the action taken with the player and close their chat when ready."
+                },
+                {
+                  text: "Close the chat without confirming the unban.",
+                  correct: false,
+                  incorrectFeedback:
+                    "It’s important to confirm the action taken with the player before closing the chat."
+                },
+                {
+                  text: "Deny the appeal but thank the player for their time.",
+                  correct: false,
+                  incorrectFeedback:
+                    "If the decision is to unban, you should proceed with unbanning, not denying."
+                }
+              ]
+            }
+          ]
         }
-
-        // Initialize chat on page load
-        window.onload = initChat;
+      ];
+      
+      function SupportScenarioSelector() {
+        const [selectedScenarioIndex, setSelectedScenarioIndex] = useState(null);
+        const [currentStageIndex, setCurrentStageIndex] = useState(0);
+        const [messages, setMessages] = useState([]);
+        const [shuffledResponses, setShuffledResponses] = useState([]);
+        const [isWaiting, setIsWaiting] = useState(false);
+        const [finished, setFinished] = useState(false);
+        const chatEndRef = useRef(null);
+      
+        // Scroll to the most recent message when messages update.
+        useEffect(() => {
+          chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        }, [messages]);
+      
+        // Helper function to add a message.
+        const addMessage = (msg) => {
+          setMessages((prev) => [...prev, msg]);
+        };
+      
+        // Function to shuffle responses on every new stage.
+        const shuffleResponses = (scenarioIndex, stageIndex) => {
+          const responses = [...scenarios[scenarioIndex].stages[stageIndex].responses];
+          for (let i = responses.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [responses[i], responses[j]] = [responses[j], responses[i]];
+          }
+          setShuffledResponses(responses);
+        };
+      
+        // Handle selecting a scenario.
+        const handleScenarioSelect = (index) => {
+          setSelectedScenarioIndex(index);
+          setCurrentStageIndex(0);
+          setMessages([]);
+          setFinished(false);
+          const prompt = scenarios[index].stages[0].prompt;
+          addMessage({ from: "system", text: prompt });
+          shuffleResponses(index, 0);
+        };
+      
+        // Handle answer click events.
+        const handleAnswerClick = (response) => {
+          if (isWaiting) return;
+          setIsWaiting(true);
+      
+          // Append the user's answer.
+          addMessage({ from: "user", text: response.text });
+          const feedback = response.correct ? response.feedback : response.incorrectFeedback;
+          const type = response.correct ? "correct" : "incorrect";
+          addMessage({ from: "system", text: feedback, type: type });
+      
+          if (response.correct) {
+            if (currentStageIndex < scenarios[selectedScenarioIndex].stages.length - 1) {
+              setTimeout(() => {
+                const newStageIndex = currentStageIndex + 1;
+                setCurrentStageIndex(newStageIndex);
+                const nextPrompt = scenarios[selectedScenarioIndex].stages[newStageIndex].prompt;
+                addMessage({ from: "system", text: nextPrompt });
+                shuffleResponses(selectedScenarioIndex, newStageIndex);
+                setIsWaiting(false);
+              }, 1000);
+            } else {
+              setTimeout(() => {
+                addMessage({
+                  from: "system",
+                  text: "This is the end of the quiz, great job!"
+                });
+                setFinished(true);
+                setIsWaiting(false);
+              }, 1000);
+            }
+          } else {
+            setTimeout(() => setIsWaiting(false), 500);
+          }
+        };
+      
+        // Return to the scenario selection menu.
+        const handleBackToMenu = () => {
+          setSelectedScenarioIndex(null);
+          setCurrentStageIndex(0);
+          setMessages([]);
+          setShuffledResponses([]);
+          setFinished(false);
+        };
+      
+        if (selectedScenarioIndex === null) {
+          return (
+            <div className="p-4">
+              <h1 className="text-2xl font-bold mb-4">Support Scenario Selector</h1>
+              <div className="grid gap-2">
+                {scenarios.map((scenario, idx) => (
+                  <button
+                    key={idx}
+                    className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
+                    onClick={() => handleScenarioSelect(idx)}
+                  >
+                    {scenario.title}
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        }
+      
+        return (
+          <div className="max-w-xl mx-auto flex flex-col h-screen">
+            <div className="bg-blue-500 text-white text-center font-bold py-2">
+              {scenarios[selectedScenarioIndex].title}
+            </div>
+            <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-gray-50">
+              {messages.map((msg, idx) => (
+                <div key={idx} className={msg.from === "user" ? "text-right" : "text-left"}>
+                  <div
+                    className={`inline-block py-1 px-2 w-fit max-w-md whitespace-normal rounded-lg ${
+                      msg.from === "user"
+                        ? "bg-blue-500 text-white text-left" // User bubble: positioned on right, text left-aligned
+                        : msg.from === "system" && msg.type === "correct"
+                        ? "bg-green-200 border border-green-500 text-black px-2"
+                        : msg.from === "system" && msg.type === "incorrect"
+                        ? "bg-red-200 border border-red-500 text-black px-2"
+                        : "bg-gray-200 text-black px-2"
+                    }`}
+                  >
+                    {msg.text}
+                  </div>
+                </div>
+              ))}
+              <div ref={chatEndRef}></div>
+            </div>
+            <div className="p-4 bg-white shadow-inner">
+              {finished ? (
+                <button
+                  onClick={handleBackToMenu}
+                  className="w-full text-center px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded"
+                >
+                  Back to Main Menu
+                </button>
+              ) : (
+                <div className="grid gap-2">
+                  {shuffledResponses.map((response, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleAnswerClick(response)}
+                      disabled={isWaiting}
+                      className="w-full text-left px-4 py-2 bg-blue-100 hover:bg-blue-200 rounded disabled:opacity-50"
+                    >
+                      {response.text}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      }
+      
+      ReactDOM.render(
+        <SupportScenarioSelector />,
+        document.getElementById("root")
+      );
     </script>
-</body>
+  </body>
 </html>
