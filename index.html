@@ -28,49 +28,49 @@
           stages: [
             {
               prompt:
-                "A player contacts support saying they lost their streak. The player says they lost their streak due to being banned on Roblox. What’s your first step?",
+                "A player contacts support, saying they lost their streak. The player says they lost their streak due to being banned on Roblox. What’s your first step?",
               responses: [
                 {
-                  text: "Restore the streak since the bot let it through.",
+                  text: "Ask for a screenshot of their Roblox ban reason.",
                   correct: false,
                   incorrectFeedback:
-                    "Even if it passed the bot, we still need to double-check. The bot is not perfect."
+                    "We no longer need to verify the reason. Bans don’t disqualify someone from a streak restore."
                 },
                 {
                   text: "Decline the request immediately.",
                   correct: false,
                   incorrectFeedback:
-                    "Don't rush to deny it. First, review the ban reason to see if it's valid."
+                    "Roblox bans don’t automatically disqualify a streak restoration, so this would be too hasty."
                 },
                 {
-                  text: "Ask for a screenshot of their Roblox ban reason.",
+                  text: "Start the investigation and restoration process as usual. Roblox bans don't disqualify players.",
                   correct: true,
                   feedback:
-                    "That’s right. You need to confirm whether the ban was justified before taking action."
+                    "That's right. We allow players to regain their streaks even if they were banned on Roblox. There is no need to verify the reason."
                 }
               ]
             },
             {
               prompt:
-                "The player shares a screenshot. The ban reason says: 'Saying Don’t trust trade me.' What should you do?",
+                "You’ve confirmed the player is eligible for a streak restore. What should you do next?",
               responses: [
                 {
-                  text: "Consider the ban unjustified and continue the process.",
+                  text: "Run the getstreak command to check their streak data.",
                   correct: true,
                   feedback:
-                    "Correct. This appears to be a misunderstanding — the player was likely warning others."
+                    "Correct! You need to look at the player's longest and current streak data before deciding what to restore."
                 },
                 {
-                  text: "Decline the request.",
+                  text: "Run the setstreak command to restore it.",
                   correct: false,
                   incorrectFeedback:
-                    "That would be unfair. The ban reason does not suggest harmful behaviour."
+                    "Not yet! You need to check the correct value to restore first."
                 },
                 {
-                  text: "Escalate to a manager.",
+                  text: "Ask the player how many days they lost.",
                   correct: false,
                   incorrectFeedback:
-                    "You can handle this yourself. It falls within normal support policy."
+                    "We base restores on CMDR data, not the player's words. In addition, the bot will have already asked this, and they do not need to be asked again."
                 }
               ]
             },
