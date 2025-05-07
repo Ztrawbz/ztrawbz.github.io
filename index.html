@@ -720,25 +720,25 @@
           stages: [
             {
               prompt:
-                "A player was banned from Adopt Me, and they have come to us to appeal their ban. The player was banned 160 days ago. What should you do?",
+                "A player was banned from Adopt Me 2 days ago and wants to appeal. Would this fall under the time limit for appeals?",
               responses: [
                 {
-                  text: "Proceed with the appeal.",
+                  text: "Yes, it’s within the 180-day window.",
                   correct: true,
                   feedback:
-                    "Correct. Since the ban was within the last 180 days, the appeal can be processed."
+                    "Correct. The ban is recent, and the player is allowed to appeal within 180 days of the ban."
                 },
                 {
-                  text: "Deny the appeal.",
+                  text: "No, the ban is too recent.",
                   correct: false,
                   incorrectFeedback:
-                    "The ban is within the time window for appeals, so this is incorrect."
+                    "Incorrect. The timing is fine; the issue of “too recent” only applies to certain ban codes, not the overall 180-day window."
                 },
                 {
-                  text: "Ask the player to wait another day.",
+                  text: "No, players can only appeal after 6 months.",
                   correct: false,
                   incorrectFeedback:
-                    "There's no need to ask them to wait. The appeal is eligible for processing."
+                    "That’s backwards! Appeals are only valid within 6 months (180 days), not after."
                 }
               ]
             },
