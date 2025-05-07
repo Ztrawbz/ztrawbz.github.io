@@ -14,11 +14,15 @@
     <!-- React and ReactDOM from CDN -->
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script>
+      // Enable Babel for all script tags with type="text/babel"
+      window.Babel = Babel;
+    </script>
   </head>
   <body class="bg-gray-100">
     <div id="root"></div>
     
-    <script type="text/babel">
+    <script type="text/babel" data-type="module" data-presets="react">
       const { useState, useEffect, useRef } = React;
 
       // Define the scenarios array with three quizzes.
@@ -370,7 +374,7 @@
           ]
         },
         {
-          title: "Hacked Policy",
+          title: "Hacked Scenario",
           stages: [
             {
               prompt:
@@ -543,7 +547,7 @@
           ]
         },
         {
-          title: "Purchase Issue Policy",
+          title: "Purchase Issue Scenario",
           stages: [
             {
               prompt:
@@ -716,7 +720,7 @@
           ]
         },
         {
-          title: "Ban Appeal Policy",
+          title: "Ban Appeal Scenario",
           stages: [
             {
               prompt:
@@ -895,6 +899,9 @@
         const [currentStageIndex, setCurrentStageIndex] = useState(0);
         const [messages, setMessages] = useState([]);
         const [shuffledResponses, setShuffledResponses] = useState([]);
+        const [score, setScore] = useState(0);
+        const [totalQuestions, setTotalQuestions] = useState(0);
+        const [answeredQuestions, setAnsweredQuestions] = useState({});
         const [isWaiting, setIsWaiting] = useState(false);
         const [finished, setFinished] = useState(false);
         const chatEndRef = useRef(null);
@@ -925,45 +932,113 @@
           setCurrentStageIndex(0);
           setMessages([]);
           setFinished(false);
+          setScore(0);
+          setAnsweredQuestions({});
+          setTotalQuestions(scenarios[index].stages.length);
           const prompt = scenarios[index].stages[0].prompt;
           addMessage({ from: "system", text: prompt });
           shuffleResponses(index, 0);
         };
       
-        // Handle answer click events.
+        // Function to handle when an answer is clicked
         const handleAnswerClick = (response) => {
           if (isWaiting) return;
           setIsWaiting(true);
       
-          // Append the user's answer.
-          addMessage({ from: "user", text: response.text });
-          const feedback = response.correct ? response.feedback : response.incorrectFeedback;
-          const type = response.correct ? "correct" : "incorrect";
-          addMessage({ from: "system", text: feedback, type: type });
-      
-          if (response.correct) {
-            if (currentStageIndex < scenarios[selectedScenarioIndex].stages.length - 1) {
-              setTimeout(() => {
-                const newStageIndex = currentStageIndex + 1;
-                setCurrentStageIndex(newStageIndex);
-                const nextPrompt = scenarios[selectedScenarioIndex].stages[newStageIndex].prompt;
-                addMessage({ from: "system", text: nextPrompt });
-                shuffleResponses(selectedScenarioIndex, newStageIndex);
-                setIsWaiting(false);
-              }, 1000);
-            } else {
-              setTimeout(() => {
-                addMessage({
-                  from: "system",
-                  text: "This is the end of the quiz, great job!"
-                });
-                setFinished(true);
-                setIsWaiting(false);
-              }, 1000);
+          const questionId = `${selectedScenarioIndex}-${currentStageIndex}`;
+          const isCorrect = response.correct;
+          let isFirstAttempt = true;
+          
+          // Check if this question was already answered
+          if (answeredQuestions[questionId]) {
+            isFirstAttempt = false;
+            // Don't proceed if they already got it right
+            if (answeredQuestions[questionId].isCorrect) {
+              setIsWaiting(false);
+              return;
             }
-          } else {
-            setTimeout(() => setIsWaiting(false), 500);
           }
+          
+          // Mark this question as answered
+          setAnsweredQuestions(prev => ({
+            ...prev,
+            [questionId]: {
+              isCorrect,
+              isFirstAttempt: isFirstAttempt && !answeredQuestions[questionId]?.isFirstAttempt
+            }
+          }));
+          
+          // Only increment score if correct on first attempt
+          if (isCorrect && isFirstAttempt) {
+            setScore(prevScore => prevScore + 1);
+          }
+      
+          // Append the user's answer
+          addMessage({ from: "user", text: response.text });
+      
+          // Provide feedback
+          const feedback = isCorrect
+            ? response.feedback || "That's correct!"
+            : response.incorrectFeedback || "That's not quite right. Try again!";
+      
+          const type = isCorrect ? "correct" : "incorrect";
+          addMessage({ from: "system", text: feedback, type: type });
+          
+          if (isCorrect) {
+            // Only move to next question if answer is correct
+            const moveToNextQuestion = () => {
+              if (currentStageIndex < scenarios[selectedScenarioIndex].stages.length - 1) {
+                // Move to the next stage
+                const nextStageIndex = currentStageIndex + 1;
+                setCurrentStageIndex(nextStageIndex);
+                const prompt = scenarios[selectedScenarioIndex].stages[nextStageIndex].prompt;
+                addMessage({ from: "system", text: prompt });
+                shuffleResponses(selectedScenarioIndex, nextStageIndex);
+              } else {
+                // No more stages, show final score
+                setFinished(true);
+                showFinalScore();
+              }
+              setIsWaiting(false);
+            };
+            
+            // Add a small delay before moving to next question
+            setTimeout(moveToNextQuestion, 1000);
+          } else {
+            // If answer was wrong, just re-enable the buttons after a short delay
+            setTimeout(() => setIsWaiting(false), 1000);
+          }
+        };
+      
+        // Function to reset the quiz to the scenario selection screen
+        const resetQuiz = () => {
+          setSelectedScenarioIndex(null);
+          setCurrentStageIndex(0);
+          setMessages([]);
+          setFinished(false);
+          setScore(0);
+          setAnsweredQuestions({});
+        };
+        
+        // Function to show the final score
+        const showFinalScore = () => {
+          // Force a re-render to ensure we have the latest score
+          setScore(prevScore => {
+            const finalScore = prevScore;
+            const percentage = Math.round((finalScore / totalQuestions) * 100);
+            let message = `Quiz Complete! You scored ${finalScore} out of ${totalQuestions} (${percentage}%)`;
+            
+            if (percentage >= 90) {
+              message += " 🎉 Excellent work!";
+            } else if (percentage >= 70) {
+              message += " 👍 Good job!";
+            } else {
+              message += " Keep practicing!";
+            }
+            
+            addMessage({ from: "system", text: message, type: "score" });
+            return prevScore; // Return the same score to avoid changing it
+          });
         };
       
         // Return to the scenario selection menu.
@@ -996,8 +1071,21 @@
       
         return (
           <div className="max-w-xl mx-auto flex flex-col h-screen">
-            <div className="bg-blue-500 text-white text-center font-bold py-2">
-              {scenarios[selectedScenarioIndex].title}
+            <div className="bg-blue-500 text-white text-center font-bold py-2 relative">
+              <button 
+                onClick={resetQuiz}
+                className="absolute left-2 bg-white text-blue-500 px-2 py-1 rounded text-sm hover:bg-gray-100"
+              >
+                ← Back to Menu
+              </button>
+              <div>
+                {scenarios[selectedScenarioIndex].title}
+                {totalQuestions > 0 && (
+                  <div className="text-sm font-normal">
+                    Score: {score}/{totalQuestions} ({Math.round((score / totalQuestions) * 100)}%)
+                  </div>
+                )}
+              </div>
             </div>
             <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-gray-50">
               {messages.map((msg, idx) => (
@@ -1010,6 +1098,8 @@
                         ? "bg-green-200 border border-green-500 text-black px-2"
                         : msg.from === "system" && msg.type === "incorrect"
                         ? "bg-red-200 border border-red-500 text-black px-2"
+                        : msg.from === "system" && msg.type === "score"
+                        ? "bg-purple-100 text-center font-bold py-4 text-lg"
                         : "bg-gray-200 text-black px-2"
                     }`}
                   >
