@@ -1246,6 +1246,7 @@ const darkModeInitial = () => {
       </button>
 
       <div className={accessibilityMode ? 'text-2xl font-bold' : ''}>
+        {/* Always show scenario title in header */}
         {scenarios[selectedScenarioIndex].title}
         <div className={`w-full px-4 py-2 ${accessibilityMode ? 'text-lg' : 'text-xs text-gray-700'}`}>
           {totalQuestions > 0 && !finished && (
@@ -1354,7 +1355,10 @@ const darkModeInitial = () => {
               }}
               title={`Press ${idx + 1} to select this answer`}
             >
-              <span className={`flex-shrink-0 inline-block mr-2 rounded-full bg-gray-200 text-gray-700 border border-gray-400 px-2 py-0.5 text-xs font-bold ${accessibilityMode ? 'text-base bg-yellow-200 border-yellow-400' : ''}`}>{idx + 1}</span>
+              {/* Hide number bubble on mobile for shorter footer */}
+              {!(typeof window !== 'undefined' && window.innerWidth <= 640) && (
+                <span className={`flex-shrink-0 inline-block mr-2 rounded-full bg-gray-200 text-gray-700 border border-gray-400 px-2 py-0.5 text-xs font-bold ${accessibilityMode ? 'text-base bg-yellow-200 border-yellow-400' : ''}`}>{idx + 1}</span>
+              )}
               <span className="flex-1 break-words">{bionicify(response.text)}</span>
             </button>
           ))}
