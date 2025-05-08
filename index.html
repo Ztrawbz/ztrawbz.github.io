@@ -1192,16 +1192,16 @@
         }
       
         return (
-          <main role="main" className={`max-w-xl mx-auto flex flex-col min-h-screen h-screen px-2 sm:px-4 py-2 ${accessibilityMode ? 'text-xl' : ''}`}>
-            <div className={`bg-blue-500 text-white text-center font-bold py-2 relative ${accessibilityMode ? 'text-2xl' : ''} sticky top-0 z-10`}>
+          <main role="main" className={`max-w-xl mx-auto flex flex-col h-screen px-2 sm:px-4 py-2 ${accessibilityMode ? 'text-xl' : ''}`}>
+            <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-2 bg-blue-500 text-white text-center font-bold py-2 relative sticky top-0 z-10">
               <button 
                 aria-label="Restart Quiz"
                 onClick={resetQuiz}
-                className="absolute left-2 top-2 bg-white text-blue-500 px-2 py-1 rounded text-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                className="order-1 sm:order-none bg-white text-blue-500 px-2 py-1 rounded text-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300"
               >
                 ← Back to Menu
               </button>
-              <div className={accessibilityMode ? 'text-2xl font-bold' : ''}>
+              <div className={`text-xl font-bold flex-1 text-center ${accessibilityMode ? 'text-2xl' : ''}`}> 
                 {scenarios[selectedScenarioIndex].title}
                 <div className={`w-full px-4 py-2 ${accessibilityMode ? 'text-lg' : 'text-xs text-gray-700'}`}>
                   {totalQuestions > 0 && !finished && (
@@ -1231,7 +1231,7 @@
                 )}
               </div>
             </div>
-            <div className="flex-1 min-h-0 p-4 overflow-y-auto space-y-4 bg-gray-50" style={{maxHeight: 'calc(100vh - 120px)'}}>
+            <div className="flex-1 min-h-0 p-4 overflow-y-auto space-y-4 bg-gray-50">
               {messages.map((msg, idx) => (
                 <div key={idx} className={msg.from === "user" ? "text-right" : "text-left"}>
                   <div
@@ -1261,7 +1261,7 @@
               )}
               <div ref={chatEndRef}></div>
             </div>
-            <div className="p-4 bg-white shadow-inner">
+            <div className="p-4 bg-white shadow-inner shrink-0">
               {finished ? (
                 <button
                   onClick={handleBackToMenu}
@@ -1272,7 +1272,7 @@
               ) : (
                 <div className="grid gap-2">
                   {!tipDismissed && (
-                    <div className={`mb-2 ${accessibilityMode ? 'text-lg' : 'text-xs text-gray-500'}`}>{bionicify('Tip: You can answer by clicking or by pressing 1, 2, or 3 on your keyboard.')}</div>
+                    <div className={`mb-2 ${accessibilityMode ? 'text-lg' : 'text-xs text-gray-500'} hidden sm:block`}>{bionicify('Tip: You can answer by clicking or by pressing 1, 2, or 3 on your keyboard.')}</div>
                   )}
                   {shuffledResponses.map((response, idx) => (
                     <button
